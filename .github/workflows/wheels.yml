@@ -22,7 +22,11 @@ jobs:
           CIBW_ARCHS: native
           CIBW_TEST_EXTRAS: test,alfak
           CIBW_TEST_COMMAND: python -m pytest -q {project}/tests
+          CIBW_ENVIRONMENT_MACOS: "MACOSX_DEPLOYMENT_TARGET=15.0"
           CMAKE_BUILD_PARALLEL_LEVEL: "2"
+      - name: Verify macOS wheel deployment target
+        if: runner.os == 'macOS'
+        run: python3 .github/scripts/check_macos_wheels.py wheelhouse "$RUNNER_ARCH"
       - uses: actions/upload-artifact@v4
         with:
           name: wheels-${{ matrix.runner }}
