@@ -1,0 +1,33 @@
+--- a/src/sparse_joint_model.h
++++ b/src/sparse_joint_model.h
+@@ -17,14 +17,25 @@
+ // states. `R/forward-closed-form.R` holds the reference implementation.
+ 
+ // log phi1(a, b; T) = log integral_0^T exp(a (T - s) + b s) ds. The absolute
+-// rate difference is smoothed at zero so that the function is differentiable
+-// everywhere; the smoothing also keeps x >= 1e-6, where 1 - exp(-x) loses at
+-// most ten digits to cancellation.
++// rate difference is smoothed at zero. Write the even part as
++// log(sinh(x / 2) / (x / 2)), with x^2 = gap^2 + 1e-12. Near zero, expand
++// sinh(x / 2) / (x / 2) in x^2 to avoid cancellation in the third
++// derivatives used by the Laplace gradient.
+ template<class Type>
+ Type sparse_joint_log_phi1(Type a, Type b, Type dt) {
+   Type gap = (a - b) * dt;
+-  Type x = sqrt(gap * gap + Type(1e-12));
+-  return Type(0.5) * (a + b) * dt + Type(0.5) * x + log(dt) + log((Type(1) - exp(-x)) / x);
++  Type squared = gap * gap + Type(1e-12);
++  const Type cutoff = Type(0.25);
++  Type small = CppAD::CondExpLt(squared, cutoff, squared, cutoff);
++  Type large = CppAD::CondExpLt(squared, cutoff, cutoff, squared);
++  Type series = Type(1.0 / 24) + small * (Type(1.0 / 1920) +
++    small * (Type(1.0 / 322560) + small * (Type(1.0 / 92897280) +
++    small * (Type(1.0 / 40874803200) + small * Type(1.0 / 25505877196800)))));
++  Type near_zero = log(Type(1) + small * series);
++  Type x = sqrt(large);
++  Type away_from_zero = Type(0.5) * x + log((Type(1) - exp(-x)) / x);
++  return Type(0.5) * (a + b) * dt + log(dt) +
++    CppAD::CondExpLt(squared, cutoff, near_zero, away_from_zero);
+ }
+ 
+ #undef TMB_OBJECTIVE_PTR

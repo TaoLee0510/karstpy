@@ -1,0 +1,7 @@
+#!/bin/sh
+# Local rule (user, 2026-11-17): no Claude attribution in any commit.
+# Install: cp handoff/commit-msg .git/hooks/commit-msg && chmod +x .git/hooks/commit-msg
+if grep -qiE '^[[:space:]]*Co-Authored-By:[[:space:]]*Claude|Generated with \[?Claude Code' "$1"; then
+  echo "commit-msg hook: Claude attribution is not allowed in this repository; remove it." >&2
+  exit 1
+fi

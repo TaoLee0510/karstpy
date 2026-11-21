@@ -1,0 +1,15 @@
+# karst snapshot, R libraries, downloaded TMB and R sources
+_reference/
+
+# Python and build artefacts
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+_skbuild/
+.pytest_cache/
+.ipynb_checkpoints/
+*.so
+*.o
+.DS_Store

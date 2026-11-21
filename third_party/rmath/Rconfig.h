@@ -1,0 +1,7 @@
+#pragma once
+
+#define HAVE_F77_UNDERSCORE 1
+#define HAVE_NEARBYINT 1
+#define HAVE_WORKING_ISFINITE 1
+#define HAVE_LONG_DOUBLE 1
+#define IEEE_754 1
